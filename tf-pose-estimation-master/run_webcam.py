@@ -47,8 +47,11 @@ if __name__ == '__main__':
         e = TfPoseEstimator(get_graph_path(args.model), target_size=(432, 368), trt_bool=str2bool(args.tensorrt))
     logger.debug('cam read+')
     cam = cv2.VideoCapture(args.camera)
+
     ret_val, image = cam.read()
+    print(type(image))
     logger.info('cam image=%dx%d' % (image.shape[1], image.shape[0]))
+
 
     while True:
         ret_val, image = cam.read()

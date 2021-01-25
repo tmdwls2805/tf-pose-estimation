@@ -405,6 +405,7 @@ class TfPoseEstimator:
         npimg_q = npimg_q.astype(np.uint8)
         return npimg_q
 
+
     @staticmethod
     def draw_humans(npimg, humans, imgcopy=False):
         if imgcopy:
@@ -412,23 +413,26 @@ class TfPoseEstimator:
         image_h, image_w = npimg.shape[:2]
         centers = {}
         plt.gca().invert_yaxis()
+        pe = []
         for human in humans:
             # draw point
-            print(human)
+            pe2 = []
             for i in range(common.CocoPart.Background.value):
+
                 if i not in human.body_parts.keys():
                     continue
 
                 body_part = human.body_parts[i]
-                print(body_part)
                 center = (int(body_part.x * image_w + 0.5), int(body_part.y * image_h + 0.5))
                 print(center)
+                pe2.append(center)
                 centers[i] = center
+
                 cv2.circle(npimg, center, 3, common.CocoColors[i], thickness=3, lineType=8, shift=0)
 
                 ## 추가 라인
                 plt.plot(center[0], center[1], 'ro')
-
+            pe.append(pe2)
 
             # draw line
             for pair_order, pair in enumerate(common.CocoPairsRender):
@@ -438,7 +442,7 @@ class TfPoseEstimator:
                 # npimg = cv2.line(npimg, centers[pair[0]], centers[pair[1]], common.CocoColors[pair_order], 3)
                 cv2.line(npimg, centers[pair[0]], centers[pair[1]], common.CocoColors[pair_order], 3)
 
-        return npimg
+        return npimg, pe
 
     def _get_scaled_img(self, npimg, scale):
         get_base_scale = lambda s, w, h: max(self.target_size[0] / float(h), self.target_size[1] / float(w)) * s
@@ -543,7 +547,8 @@ class TfPoseEstimator:
 
     def inference(self, npimg, resize_to_default=True, upsample_size=1.0):
         if npimg is None:
-            raise Exception('The image is not valid. Please check your image exists.')
+            return 1
+            # raise Exception('The image is not valid. Please check your image exists.')
 
         if resize_to_default:
             upsample_size = [int(self.target_size[1] / 8 * upsample_size), int(self.target_size[0] / 8 * upsample_size)]
